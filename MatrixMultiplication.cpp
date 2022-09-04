@@ -165,4 +165,6 @@ int main()
 		delete[] C[i];
 	}
 	delete[] A, B, C;
+
+	system("pause");
 }
