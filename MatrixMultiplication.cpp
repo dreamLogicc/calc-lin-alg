@@ -139,16 +139,22 @@ int main()
 
 	unsigned int times[6] = {0}; // Array for the execution times of algorithms
 
+	// Execution time measurement
 	times[0] = timeOf(multiplyMatrix_ijk, A, B, C, size);
 	initZero(C, size);
+
 	times[1] = timeOf(multiplyMatrix_ikj, A, B, C, size);
 	initZero(C, size);
+	
 	times[2] = timeOf(multiplyMatrix_jik, A, B, C, size);
 	initZero(C, size);
+	
 	times[3] = timeOf(multiplyMatrix_jki, A, B, C, size);
 	initZero(C, size);
+	
 	times[4] = timeOf(multiplyMatrix_kij, A, B, C, size);
 	initZero(C, size);
+	
 	times[5] = timeOf(multiplyMatrix_kji, A, B, C, size);
 	initZero(C, size);
 
