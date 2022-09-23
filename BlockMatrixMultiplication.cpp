@@ -1,9 +1,10 @@
 #include <iostream>
 #include <time.h>
 #include <math.h>
+#include <fstream>
 
-
-int **createMatrix(int size){
+int **createMatrix(int size)
+{
     int **matrix = new int *[size];
     for (int i = 0; i < size; i++)
         matrix[i] = new int[size];
@@ -15,13 +16,15 @@ int **createMatrix(int size){
 }
 
 // Function fills matrix with zeros
-void initZero(int **matr, int size){
+void initZero(int **matr, int size)
+{
     for (int i = 0; i < size; i++)
         for (int j = 0; j < size; j++)
             matr[i][j] = 0;
 }
 
-void mult(int **A, int **B, int **C, int n, int blockCount){
+void mult(int **A, int **B, int **C, int n, int blockCount)
+{
     int sblock = n / blockCount;
     for (int kb = 0; kb < blockCount; kb++)
         for (int ib = 0; ib < blockCount; ib++)
@@ -32,7 +35,8 @@ void mult(int **A, int **B, int **C, int n, int blockCount){
                             C[ib * sblock + i][jb * sblock + j] += A[ib * sblock + i][kb * sblock + k] * B[kb * sblock + k][jb * sblock + j];
 }
 
-unsigned int timeOf(void (*multiply)(int **, int **, int **, int, int), int **A, int **B, int **C, int size, int block){
+unsigned int timeOf(void (*multiply)(int **, int **, int **, int, int), int **A, int **B, int **C, int size, int block)
+{
     unsigned int start = clock();
     multiply(A, B, C, size, block);
     unsigned int end = clock();
@@ -40,37 +44,52 @@ unsigned int timeOf(void (*multiply)(int **, int **, int **, int, int), int **A,
     return time;
 }
 
-void clear(int **matrix, int size){
+void clear(int **matrix, int size)
+{
     for (int i = 0; i < size; i++)
         delete[] matrix[i];
     delete[] matrix;
 }
 
-int main(){
+int main()
+{
     srand(time(0));
-    
+    std::ofstream outputCsv;
+    outputCsv.open("result.csv");
+
     int sizes[4] = {512, 1024, 1536, 2048};
     int blockCount[10];
 
     for (int i = 1; i <= 10; i++)
         blockCount[i] = pow(2, i);
 
+    outputCsv << "Blocks" << ',';
+
     for (int i = 0; i < 4; i++)
+        outputCsv << sizes[i] << ',';
+        
+    outputCsv << std::endl;
+
+    for (int j = 1; j <= 10; j++)
     {
-        int **A = createMatrix(sizes[i]); // Creating matrix A with random numbers
-        int **B = createMatrix(sizes[i]); // Creating matrix B with random numbers
-        int **C = createMatrix(sizes[i]); // Creating matrix C with random numbers
-        for (int j = 1; j <= 10; j++)
+        outputCsv << blockCount[j] << ',';
+        for (int k = 0; k < 4; k++)
         {
-            initZero(C, sizes[i]);
-            if ((sizes[i] - blockCount[j] >= 0) && (sizes[i] % blockCount[j] == 0))
-                printf("Time for %dx%d and for block count %d is %f \n", sizes[i], sizes[i], blockCount[j], (double)timeOf(mult, A, B, C, sizes[i], blockCount[j]) / 1000);
+            if ((sizes[k] - blockCount[j] >= 0) && (sizes[k] % blockCount[j] == 0))
+            {
+                int **A = createMatrix(sizes[k]); // Creating matrix A with random numbers
+                int **B = createMatrix(sizes[k]); // Creating matrix B with random numbers
+                int **C = createMatrix(sizes[k]); // Creating matrix C with random numbers
+                initZero(C, sizes[k]);
+                outputCsv << (double)timeOf(mult, A, B, C, sizes[k], blockCount[j]) / 1000 << ',';
+                clear(A, sizes[k]);
+                clear(B, sizes[k]);
+                clear(C, sizes[k]);
+            }
+            else
+                outputCsv << 0 << ',';
         }
-        clear(A, sizes[i]);
-        clear(B, sizes[i]);
-        clear(C, sizes[i]);
+        outputCsv << std::endl;
     }
+    outputCsv.close();
 }
-
-
-
